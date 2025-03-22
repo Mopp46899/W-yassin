@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>w/yassin</title> <!-- تغيير العنوان هنا -->
+    <link rel="stylesheet" href="styles.css">
+<style type="text/css" id="dcoder_stylesheet">/* ستايل عام للصفحة */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    text-align: center;
+    color: #333;
+}
+
+/* تنسيق حاوية الاختبار */
+#quiz-container {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px;
+}
+
+h1 {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #5c6bc0;
+}
+
+button {
+    background-color: #5c6bc0;
+    color: #fff;
+    padding: 15px 30px;
+    margin: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #3f4c9a;
+}
+
+button:focus {
+    outline: none;
+}
+
+/* تنسيق الأسئلة */
+#question-container {
+    margin-top: 20px;
+}
+
+/* تنسيق النتيجة */
+#result {
+    margin-top: 30px;
+}
+
+#retake-btn {
+    background-color: #FF5722;
+}</style></head>
+<body>
+
+    <div id="quiz-container">
+        <h1>اختبار الشخصية العميق</h1>
+        <button id="start-quiz">ابدأ الاختبار</button>
+
+        <div id="question-container" style="display:none;">
+            <h3 id="question"></h3>
+            <button class="answer-btn" id="yes-btn" data-answer="yes">نعم</button>
+            <button class="answer-btn" id="no-btn" data-answer="no">لا</button>
+        </div>
+
+        <div id="result" style="display:none;">
+            <h2>النتيجة</h2>
+            <p id="personality"></p>
+            <button id="retake-btn">إعادة الاختبار</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+
+<script type="text/javascript" id="dcoder_script">// قائمة الأسئلة العميقة
+const questions = [
+    "هل تؤمن بأن حياتك تملك هدفًا محددًا تسعى لتحقيقه؟",
+    "هل تعتقد أن الأشخاص في حياتك يتفاعلون معك بسبب حبهم الحقيقي لك؟",
+    "هل تجد صعوبة في الثقة بالآخرين؟",
+    "هل تعتقد أن الشخص الذي لا يواجه تحديات في حياته يعيش حياة كاملة؟",
+    "هل ترى أن السعادة تأتي من الإنجاز أم من العلاقات الإنسانية؟",
+    "هل تجد أن المنافسة الصحية تساهم في تحفيزك لتحقيق الأفضل؟",
+    "هل تؤمن بأن الفشل هو خطوة نحو النجاح؟",
+    "هل تفضل العيش بحياة مستقرة أم مغامرة مليئة بالتحديات؟",
+    "هل تسعى دائمًا لتحسين نفسك وتحقيق أهدفك الشخصية؟",
+    "هل تفضل أن يكون لديك مجموعة صغيرة من الأصدقاء المقربين بدلًا من الكثير من المعارف؟"
+];
+
+let currentQuestionIndex = 0;
+let answers = [];
+
+document.getElementById('start-quiz').addEventListener('click', startQuiz);
+document.getElementById('retake-btn').addEventListener('click', restartQuiz);
+
+// بدء الاختبار
+function startQuiz() {
+    document.getElementById('start-quiz').style.display = 'none';
+    document.getElementById('question-container').style.display = 'block';
+    loadQuestion();
+}
+
+// تحميل السؤال العشوائي
+function loadQuestion() {
+    if (currentQuestionIndex < 10) {
+        // اختيار سؤال عشوائي
+        const randomIndex = Math.floor(Math.random() * questions.length);
+        const question = questions[randomIndex];
+        document.getElementById('question').textContent = question;
+    } else {
+        calculatePersonality();
+    }
+}
+
+// التعامل مع الأزرار
+const answerBtns = document.querySelectorAll('.answer-btn');
+answerBtns.forEach(button => {
+    button.addEventListener('click', function () {
+        answers.push(this.getAttribute('data-answer'));
+        currentQuestionIndex++;
+        loadQuestion();
+    });
+});
+
+// حساب النتيجة بناءً على الإجابات
+function calculatePersonality() {
+    let score = {
+        "محارب": 0,
+        "فارس": 0,
+        "أمير": 0,
+        "الجشع": 0,
+        "عادي": 0
+    };
+
+    answers.forEach((answer, index) => {
+        if (answer === "yes") {
+            if (index <= 2) {
+                score["محارب"]++;
+            } else if (index <= 4) {
+                score["فارس"]++;
+            } else if (index <= 6) {
+                score["أمير"]++;
+            } else if (index <= 8) {
+                score["الجشع"]++;
+            } else {
+                score["عادي"]++;
+            }
+        }
+    });
+
+    let personality = getMaxPersonality(score);
+    showResult(personality);
+}
+
+// تحديد الشخصية بناءً على النتيجة
+function getMaxPersonality(score) {
+    let maxScore = Math.max(...Object.values(score));
+    for (let personality in score) {
+        if (score[personality] === maxScore) {
+            return personality;
+        }
+    }
+}
+
+// عرض النتيجة
+function showResult(personality) {
+    document.getElementById('question-container').style.display = 'none';
+    document.getElementById('result').style.display = 'block';
+    document.getElementById('personality').textContent = `شخصيتك هي: ${personality}`;
+}
+
+// إعادة الاختبار
+function restartQuiz() {
+    currentQuestionIndex = 0;
+    answers = [];
+    document.getElementById('result').style.display = 'none';
+    document.getElementById('start-quiz').style.display = 'block';
+}</script></body></html>
